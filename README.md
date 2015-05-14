@@ -24,3 +24,8 @@ Medição detalhada de resultados nos dados de treino e de teste.
 Algoritmo Utilizado:
 Algoritmos de Aprendizagem ID3 e C4.5.
 
+
+Trabalho feito por:
+- Sofia Reis
+- Paulo Costa
+- Maria João Marques
