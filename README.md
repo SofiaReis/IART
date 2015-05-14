@@ -1,6 +1,6 @@
 # IART
 
-Objetivo
+=== Objetivo ===
 
 A partir de um conjunto de exemplos, é possível aprender (ou derivar) as regras de classificação para o domínio em análise. O objetivo deste projeto é a determinação da árvore de decisão que traduz essas regras no diagnóstico de Parkinson.
 
