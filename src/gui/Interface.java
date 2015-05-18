@@ -88,7 +88,11 @@ public class Interface extends JFrame {
 				if(trainDataPath.equals(""))
 					JOptionPane.showMessageDialog(null, "Select train data first!");
 				else
-					new ParkinsonClassification(trainDataPath, testDataPath, testOption, outputArea);
+					try {
+						new ParkinsonClassification(trainDataPath, testDataPath, testOption, outputArea);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 			}
 		});
 	}
