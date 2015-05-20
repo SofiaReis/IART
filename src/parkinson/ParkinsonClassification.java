@@ -4,11 +4,15 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Random;
+
 import javax.swing.JTextArea;
-import weka.classifiers.Classifier;
+
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 public class ParkinsonClassification {
 
@@ -20,7 +24,7 @@ public class ParkinsonClassification {
 	private BufferedReader trainBuffer, testBuffer;
 
 	private Evaluation evaluation;
-	private Classifier classifier;
+	private J48 classifier;
 
 	public ParkinsonClassification(String trainDataPath, String testDataPath,
 			String testOption, JTextArea logsOut) throws Exception {
@@ -30,14 +34,26 @@ public class ParkinsonClassification {
 		this.logsOut = logsOut;
 
 		classifier = new J48();
-		
+
 		if (!getFileBuffers())
 			return;
 		if (!buildInstances())
 			return;
-		
-		startTraining();
-		startWithTestFile();
+
+		start();
+	}
+
+	private void start() throws Exception {
+
+		buildClassifier();
+
+		if (testOption.equals("cross")) {
+			crossValidation();
+		} else if (testOption.equals("trainData")) {
+			trainFileTest();
+		} else if (testOption.equals("testData")) {
+			testFile();
+		}
 	}
 
 	private boolean buildInstances() {
@@ -49,7 +65,7 @@ public class ParkinsonClassification {
 			return false;
 		}
 
-		if (testDataPath.equals("")) {
+		if (!testDataPath.equals("")) {
 			try {
 				testDataInstances = new Instances(testBuffer);
 			} catch (IOException e) {
@@ -82,26 +98,63 @@ public class ParkinsonClassification {
 		return true;
 	}
 
-	private void startWithTestFile() throws Exception {
-//		testDataInstances.delete(0);
-
-		testDataInstances.setClassIndex(testDataInstances.numAttributes() - 1);
+	private void testFile() throws Exception {
 		evaluation = new Evaluation(testDataInstances);
 		evaluation.evaluateModel(classifier, testDataInstances);
-		
-		logsOut.append("Correto: " + evaluation.pctCorrect());
+
+		logsOut.append("Correctly Classified Instances: " + evaluation.correct() + ", "
+				+ (double)Math.round(evaluation.pctCorrect() * 1000) / 1000 + "%\n");
+		logsOut.append("Incorrectly Classified Instances: " + evaluation.incorrect() + ", "
+				+ (double)Math.round(evaluation.pctIncorrect() * 1000) / 1000 + "%\n\n");
 	}
 
-	private void startTraining() throws Exception {
-		// apagar os atributos que queremos deixar de parte da analise
-//		trainDataInstances.delete(0);
-//		trainDataInstances.delete(trainDataInstances.numAttributes() - 2);
+	private void crossValidation() throws Exception {
+		evaluation = new Evaluation(trainDataInstances);
+		evaluation.crossValidateModel(classifier, trainDataInstances, 10,
+				new Random(1));
 
+		logsOut.append("Correctly Classified Instances: " + evaluation.correct() + ", "
+				+ (double)Math.round(evaluation.pctCorrect() * 1000) / 1000 + "%\n");
+		logsOut.append("Incorrectly Classified Instances: " + evaluation.incorrect() + ", "
+				+ (double)Math.round(evaluation.pctIncorrect() * 1000) / 1000 + "%\n\n");
+	}
+
+	private void trainFileTest() throws Exception {
+		evaluation = new Evaluation(trainDataInstances);
+		evaluation.evaluateModel(classifier, trainDataInstances);
+
+		logsOut.append("Correctly Classified Instances: " + evaluation.correct() + ", "
+				+ (double)Math.round(evaluation.pctCorrect() * 1000) / 1000 + "%\n");
+		logsOut.append("Incorrectly Classified Instances: " + evaluation.incorrect() + ", "
+				+ (double)Math.round(evaluation.pctIncorrect() * 1000) / 1000 + "%\n\n");
+	}
+
+	private void buildClassifier() throws Exception {
 		trainDataInstances
 				.setClassIndex(trainDataInstances.numAttributes() - 1);
-		
+		if (!testDataPath.equals(""))
+			testDataInstances
+					.setClassIndex(testDataInstances.numAttributes() - 1);
+
+		Remove remove1 = new Remove();
+		remove1.setAttributeIndices("1,2,4,7,12,13,14,25,28"); // por aqui os indices dos
+												// atributos a remover
+		remove1.setInvertSelection(false);
+		remove1.setInputFormat(trainDataInstances);
+		trainDataInstances = Filter.useFilter(trainDataInstances, remove1);
+
+		if (!testDataPath.equals("")) {
+			Remove remove2 = new Remove();
+			remove2.setAttributeIndices("1,2,4,7,12,13,14,25");
+			remove2.setInvertSelection(false);
+			remove2.setInputFormat(testDataInstances);
+			testDataInstances = Filter.useFilter(testDataInstances, remove2);
+		}
 		
 		classifier.buildClassifier(trainDataInstances);
 	}
 
+	public J48 getClassifier() {
+		return classifier;
+	}
 }

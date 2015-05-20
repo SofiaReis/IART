@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -8,6 +9,8 @@ import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
@@ -20,6 +23,8 @@ import javax.swing.JRadioButton;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import parkinson.ParkinsonClassification;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
 
 public class Interface extends JFrame {
 
@@ -30,9 +35,13 @@ public class Interface extends JFrame {
 	private String trainDataPath = "";
 	private String testDataPath = "";
 
-	JRadioButton rdbtnUseTestData;
-	JRadioButton rdbtnCrossvalidation;
-	JRadioButton rdbtnUseTrainingData;
+	private JRadioButton rdbtnUseTestData;
+	private JRadioButton rdbtnCrossvalidation;
+	private JRadioButton rdbtnUseTrainingData;
+
+	private ParkinsonClassification parkinsonClassification = null;
+
+	private JFrame tree = new JFrame("Decision Tree");
 
 	/**
 	 * Launch the application.
@@ -55,7 +64,7 @@ public class Interface extends JFrame {
 	 */
 	public Interface() {
 		setResizable(false);
-		setTitle("Diagn\u00F3stico de Parkinson");
+		setTitle("Parkinson Diagnosis");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 500, 400);
 		getContentPane().setLayout(null);
@@ -69,7 +78,7 @@ public class Interface extends JFrame {
 		getContentPane().add(outputArea);
 
 		JButton btnStart = new JButton("Start");
-		btnStart.setBounds(202, 143, 97, 25);
+		btnStart.setBounds(100, 145, 97, 25);
 		getContentPane().add(btnStart);
 		btnStart.addActionListener(new ActionListener() {
 
@@ -77,22 +86,41 @@ public class Interface extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				
 				String testOption;
-				
-				if(rdbtnCrossvalidation.isSelected())
+
+				if (rdbtnCrossvalidation.isSelected())
 					testOption = "cross";
-				else if(rdbtnUseTrainingData.isSelected())
+				else if (rdbtnUseTrainingData.isSelected())
 					testOption = "trainData";
 				else
 					testOption = "testData";
-				
-				if(trainDataPath.equals(""))
-					JOptionPane.showMessageDialog(null, "Select train data first!");
+
+				if (trainDataPath.equals(""))
+					JOptionPane.showMessageDialog(null,
+							"Select train data first!");
 				else
 					try {
-						new ParkinsonClassification(trainDataPath, testDataPath, testOption, outputArea);
+						parkinsonClassification = new ParkinsonClassification(
+								trainDataPath, testDataPath, testOption,
+								outputArea);
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
+			}
+		});
+
+		JButton btnViewTree = new JButton("View tree");
+		btnViewTree.setBounds(297, 145, 97, 25);
+		getContentPane().add(btnViewTree);
+		btnViewTree.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					if (parkinsonClassification != null)
+						viewTree();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 	}
@@ -185,5 +213,23 @@ public class Interface extends JFrame {
 		buttonGroup.add(rdbtnUseTrainingData);
 		rdbtnUseTrainingData.setSelected(true);
 		rdbtnUseTestData.setEnabled(false);
+	}
+
+	public void viewTree() throws Exception {
+		tree.setSize(1300, 700);
+		tree.getContentPane().setLayout(new BorderLayout());
+		TreeVisualizer visualizer = null;
+		visualizer = new TreeVisualizer(null, parkinsonClassification
+				.getClassifier().graph(), new PlaceNode2());
+
+		tree.getContentPane().add(visualizer, BorderLayout.CENTER);
+		tree.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				tree.dispose();
+			}
+		});
+
+		tree.setVisible(true);
+		visualizer.fitToScreen();
 	}
 }
