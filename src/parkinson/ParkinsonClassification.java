@@ -26,6 +26,8 @@ public class ParkinsonClassification {
 	private Evaluation evaluation;
 	private J48 classifier;
 
+	private double elapsedTime;
+
 	public ParkinsonClassification(String trainDataPath, String testDataPath,
 			String testOption, JTextArea logsOut) throws Exception {
 		this.trainDataPath = trainDataPath;
@@ -47,6 +49,8 @@ public class ParkinsonClassification {
 
 		buildClassifier();
 
+		long tStart = System.currentTimeMillis();
+
 		if (testOption.equals("cross")) {
 			crossValidation();
 		} else if (testOption.equals("trainData")) {
@@ -54,6 +58,24 @@ public class ParkinsonClassification {
 		} else if (testOption.equals("testData")) {
 			testFile();
 		}
+
+		long tEnd = System.currentTimeMillis();
+		long tDelta = tEnd - tStart;
+		elapsedTime = tDelta / 1000.0;
+
+		logsOut.append("Correctly Classified Instances\t\t"
+				+ (int) evaluation.correct() + "\t"
+				+ (double) Math.round(evaluation.pctCorrect() * 1000) / 1000
+				+ "%\n");
+		logsOut.append("Incorrectly Classified Instances\t\t"
+				+ (int) evaluation.incorrect() + "\t"
+				+ (double) Math.round(evaluation.pctIncorrect() * 1000) / 1000
+				+ "%\n");
+		
+//		logsOut.append(evaluation.toSummaryString());
+		logsOut.append("Elapsed time\t\t\t" + elapsedTime + "\n\n");
+		logsOut.append(evaluation.toMatrixString() + "\n");
+
 	}
 
 	private boolean buildInstances() {
@@ -101,32 +123,17 @@ public class ParkinsonClassification {
 	private void testFile() throws Exception {
 		evaluation = new Evaluation(testDataInstances);
 		evaluation.evaluateModel(classifier, testDataInstances);
-
-		logsOut.append("Correctly Classified Instances: " + evaluation.correct() + ", "
-				+ (double)Math.round(evaluation.pctCorrect() * 1000) / 1000 + "%\n");
-		logsOut.append("Incorrectly Classified Instances: " + evaluation.incorrect() + ", "
-				+ (double)Math.round(evaluation.pctIncorrect() * 1000) / 1000 + "%\n\n");
 	}
 
 	private void crossValidation() throws Exception {
 		evaluation = new Evaluation(trainDataInstances);
 		evaluation.crossValidateModel(classifier, trainDataInstances, 10,
 				new Random(1));
-
-		logsOut.append("Correctly Classified Instances: " + evaluation.correct() + ", "
-				+ (double)Math.round(evaluation.pctCorrect() * 1000) / 1000 + "%\n");
-		logsOut.append("Incorrectly Classified Instances: " + evaluation.incorrect() + ", "
-				+ (double)Math.round(evaluation.pctIncorrect() * 1000) / 1000 + "%\n\n");
 	}
 
 	private void trainFileTest() throws Exception {
 		evaluation = new Evaluation(trainDataInstances);
 		evaluation.evaluateModel(classifier, trainDataInstances);
-
-		logsOut.append("Correctly Classified Instances: " + evaluation.correct() + ", "
-				+ (double)Math.round(evaluation.pctCorrect() * 1000) / 1000 + "%\n");
-		logsOut.append("Incorrectly Classified Instances: " + evaluation.incorrect() + ", "
-				+ (double)Math.round(evaluation.pctIncorrect() * 1000) / 1000 + "%\n\n");
 	}
 
 	private void buildClassifier() throws Exception {
@@ -137,8 +144,9 @@ public class ParkinsonClassification {
 					.setClassIndex(testDataInstances.numAttributes() - 1);
 
 		Remove remove1 = new Remove();
-		remove1.setAttributeIndices("1,2,4,7,12,13,14,25,28"); // por aqui os indices dos
-												// atributos a remover
+		remove1.setAttributeIndices("1,2,4,7,12,13,14,25,28"); // por aqui os
+																// indices dos
+		// atributos a remover
 		remove1.setInvertSelection(false);
 		remove1.setInputFormat(trainDataInstances);
 		trainDataInstances = Filter.useFilter(trainDataInstances, remove1);
@@ -150,7 +158,7 @@ public class ParkinsonClassification {
 			remove2.setInputFormat(testDataInstances);
 			testDataInstances = Filter.useFilter(testDataInstances, remove2);
 		}
-		
+
 		classifier.buildClassifier(trainDataInstances);
 	}
 

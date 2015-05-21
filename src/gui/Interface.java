@@ -11,10 +11,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
@@ -39,9 +44,12 @@ public class Interface extends JFrame {
 	private JRadioButton rdbtnCrossvalidation;
 	private JRadioButton rdbtnUseTrainingData;
 
+	private JTextArea outputArea;
+
 	private ParkinsonClassification parkinsonClassification = null;
 
 	private JFrame tree = new JFrame("Decision Tree");
+	private JFrame rules = new JFrame("Rules");
 
 	/**
 	 * Launch the application.
@@ -63,28 +71,35 @@ public class Interface extends JFrame {
 	 * Create the frame.
 	 */
 	public Interface() {
+
 		setResizable(false);
 		setTitle("Parkinson Diagnosis");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 500, 400);
+		setLocationRelativeTo(null); 
 		getContentPane().setLayout(null);
 
 		filesLoader();
 
 		testOptions();
 
-		JTextArea outputArea = new JTextArea();
-		outputArea.setBounds(0, 183, 494, 182);
-		getContentPane().add(outputArea);
+		buttons();
 
+		outputArea = new JTextArea();
+		getContentPane().add(outputArea);
+		JScrollPane scrollPane = new JScrollPane(outputArea);
+		scrollPane.setBounds(0, 183, 495, 183);
+		getContentPane().add(scrollPane);
+	}
+
+	private void buttons() {
 		JButton btnStart = new JButton("Start");
-		btnStart.setBounds(100, 145, 97, 25);
+		btnStart.setBounds(50, 145, 97, 25);
 		getContentPane().add(btnStart);
 		btnStart.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+
 				String testOption;
 
 				if (rdbtnCrossvalidation.isSelected())
@@ -109,7 +124,7 @@ public class Interface extends JFrame {
 		});
 
 		JButton btnViewTree = new JButton("View tree");
-		btnViewTree.setBounds(297, 145, 97, 25);
+		btnViewTree.setBounds(197, 145, 97, 25);
 		getContentPane().add(btnViewTree);
 		btnViewTree.addActionListener(new ActionListener() {
 
@@ -118,26 +133,50 @@ public class Interface extends JFrame {
 				try {
 					if (parkinsonClassification != null)
 						viewTree();
+					else
+						JOptionPane.showMessageDialog(null,
+								"Make classification first!");
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
 		});
+
+		JButton btnViewRules = new JButton("View rules");
+		btnViewRules.setBounds(344, 145, 97, 25);
+		getContentPane().add(btnViewRules);
+		btnViewRules.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					if (parkinsonClassification != null)
+						viewRules();
+					else {
+						JOptionPane.showMessageDialog(null,
+								"Make classification first!");
+					}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+
 	}
 
 	private void filesLoader() {
 		JLabel lblSelectTrainData = new JLabel("Select train data");
 		lblSelectTrainData.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		lblSelectTrainData.setBounds(12, 13, 110, 25);
+		lblSelectTrainData.setBounds(14, 13, 110, 25);
 		getContentPane().add(lblSelectTrainData);
 
 		trainDataPathField = new JTextField();
-		trainDataPathField.setBounds(134, 13, 230, 25);
+		trainDataPathField.setBounds(138, 13, 230, 25);
 		getContentPane().add(trainDataPathField);
 		trainDataPathField.setColumns(10);
 
 		JButton btnSelectTrainData = new JButton("Select File");
-		btnSelectTrainData.setBounds(376, 10, 97, 30);
+		btnSelectTrainData.setBounds(382, 10, 97, 30);
 		getContentPane().add(btnSelectTrainData);
 		btnSelectTrainData.addActionListener(new ActionListener() {
 
@@ -158,16 +197,16 @@ public class Interface extends JFrame {
 
 		JLabel lblSelectTestData = new JLabel("Select test data");
 		lblSelectTestData.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		lblSelectTestData.setBounds(12, 51, 110, 25);
+		lblSelectTestData.setBounds(14, 51, 110, 25);
 		getContentPane().add(lblSelectTestData);
 
 		testDataPathField = new JTextField();
 		testDataPathField.setColumns(10);
-		testDataPathField.setBounds(134, 51, 230, 25);
+		testDataPathField.setBounds(138, 51, 230, 25);
 		getContentPane().add(testDataPathField);
 
 		JButton btnSelectTestData = new JButton("Select File");
-		btnSelectTestData.setBounds(376, 48, 97, 30);
+		btnSelectTestData.setBounds(382, 48, 97, 30);
 		getContentPane().add(btnSelectTestData);
 		btnSelectTestData.addActionListener(new ActionListener() {
 
@@ -192,7 +231,7 @@ public class Interface extends JFrame {
 		JLabel lblTestOptions = new JLabel("Test Options");
 		lblTestOptions.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTestOptions.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		lblTestOptions.setBounds(205, 89, 90, 20);
+		lblTestOptions.setBounds(208, 89, 90, 20);
 		getContentPane().add(lblTestOptions);
 
 		rdbtnUseTrainingData = new JRadioButton("Use training data");
@@ -231,5 +270,46 @@ public class Interface extends JFrame {
 
 		tree.setVisible(true);
 		visualizer.fitToScreen();
+	}
+
+	private void viewRules() {
+
+		rules.setSize(500, 700);
+		rules.setVisible(true);
+
+		// TEXT AREA
+		JTextArea textArea = new JTextArea();
+		rules.add(textArea, BorderLayout.CENTER);
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		rules.add(scrollPane);
+		textArea.setText(parkinsonClassification.getClassifier().toString());
+
+		// BUTTON
+		JButton btnExportRulesTo = new JButton("Export rules to file");
+		rules.add(btnExportRulesTo, BorderLayout.SOUTH);
+		btnExportRulesTo.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setDialogTitle("Save File");
+				FileNameExtensionFilter filter = new FileNameExtensionFilter(
+						"TXT file", "txt");
+				fileChooser.setFileFilter(filter);
+				int userSelection = fileChooser.showSaveDialog(rules);
+
+				if (userSelection == JFileChooser.APPROVE_OPTION) {
+					File fileToSave = new File(fileChooser.getSelectedFile()
+							+ ".txt");
+					BufferedWriter outFile = null;
+					try {
+						outFile = new BufferedWriter(new FileWriter(fileToSave));
+						textArea.write(outFile);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
 	}
 }
