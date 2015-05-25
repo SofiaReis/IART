@@ -94,11 +94,11 @@ public class ParkinsonEvaluation {
 		
 		testDataInstances.setClassIndex(testDataInstances.numAttributes() - 1);
 
-		Remove remove2 = new Remove();
-		remove2.setAttributeIndices("1,2,4,7,12,13,14,25");
-		remove2.setInvertSelection(false);
-		remove2.setInputFormat(testDataInstances);
-		testDataInstances = Filter.useFilter(testDataInstances, remove2);
+		Remove remove = new Remove();
+		remove.setAttributeIndices("1,2,4,7,12,13,14,25");
+		remove.setInvertSelection(false);
+		remove.setInputFormat(testDataInstances);
+		testDataInstances = Filter.useFilter(testDataInstances, remove);
 	}
 
 	private void getFileBuffer() {
