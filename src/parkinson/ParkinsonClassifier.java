@@ -20,9 +20,7 @@ public class ParkinsonClassifier implements Serializable {
 	private String trainDataPath;
 
 	private Instances trainDataInstances;
-
 	private BufferedReader trainBuffer;
-
 	private J48 classifier;
 
 	public ParkinsonClassifier(String trainDataPath, JTextArea logsOut)
@@ -72,10 +70,10 @@ public class ParkinsonClassifier implements Serializable {
 		trainDataInstances
 				.setClassIndex(trainDataInstances.numAttributes() - 1);
 
-		Remove remove = new Remove();
-		remove.setAttributeIndices("1,2,4,7,12,13,14,25,28"); // por aqui os
-																// indices dos
 		// atributos a remover
+		Remove remove = new Remove();
+		 remove.setAttributeIndices("1,2,4,7,12,13,14,25,28");
+//		remove.setAttributeIndices("1,28");
 		remove.setInvertSelection(false);
 		remove.setInputFormat(trainDataInstances);
 		trainDataInstances = Filter.useFilter(trainDataInstances, remove);

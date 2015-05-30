@@ -247,19 +247,19 @@ public class Interface extends JFrame {
 		JLabel lblTestOptions = new JLabel("Test Options");
 		lblTestOptions.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTestOptions.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		lblTestOptions.setBounds(208, 89, 90, 20);
+		lblTestOptions.setBounds(202, 89, 90, 20);
 		getContentPane().add(lblTestOptions);
 
 		rdbtnUseTrainingData = new JRadioButton("Use training data");
-		rdbtnUseTrainingData.setBounds(28, 111, 127, 25);
+		rdbtnUseTrainingData.setBounds(28, 111, 135, 25);
 		getContentPane().add(rdbtnUseTrainingData);
 
 		rdbtnCrossvalidation = new JRadioButton("Cross-validation");
-		rdbtnCrossvalidation.setBounds(183, 111, 127, 25);
+		rdbtnCrossvalidation.setBounds(183, 111, 135, 25);
 		getContentPane().add(rdbtnCrossvalidation);
 
 		rdbtnUseTestData = new JRadioButton("Use test data");
-		rdbtnUseTestData.setBounds(338, 111, 127, 25);
+		rdbtnUseTestData.setBounds(338, 111, 135, 25);
 		getContentPane().add(rdbtnUseTestData);
 
 		ButtonGroup buttonGroup = new ButtonGroup();
