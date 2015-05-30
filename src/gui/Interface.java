@@ -32,6 +32,8 @@ import parkinson.ParkinsonEvaluation;
 import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
 
+import javax.swing.JCheckBox;
+
 public class Interface extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -45,7 +47,11 @@ public class Interface extends JFrame {
 	private JRadioButton rdbtnCrossvalidation;
 	private JRadioButton rdbtnUseTrainingData;
 
+	private JCheckBox chckbxUnpruned;
+
 	private JTextArea outputArea;
+
+	private JButton btnBuildClassifier;
 
 	private ParkinsonClassifier parkinsonClassifier;
 
@@ -75,7 +81,7 @@ public class Interface extends JFrame {
 
 		setResizable(false);
 		setTitle("Parkinson Diagnosis");
-		setBounds(100, 100, 500, 400);
+		setBounds(100, 100, 500, 441);
 		setLocationRelativeTo(null);
 		getContentPane().setLayout(null);
 
@@ -85,16 +91,28 @@ public class Interface extends JFrame {
 
 		buttons();
 
+		chckbxUnpruned = new JCheckBox("Unpruned tree");
+		chckbxUnpruned.setBounds(28, 141, 135, 25);
+		getContentPane().add(chckbxUnpruned);
+		chckbxUnpruned.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+					btnBuildClassifier.setEnabled(true);
+			}
+		});
+
 		outputArea = new JTextArea();
+		outputArea.setBounds(0, 224, 495, 183);
 		getContentPane().add(outputArea);
 		JScrollPane scrollPane = new JScrollPane(outputArea);
-		scrollPane.setBounds(0, 183, 495, 183);
+		scrollPane.setBounds(0, 224, 495, 183);
 		getContentPane().add(scrollPane);
 	}
 
 	private void buttons() {
 		JButton btnStart = new JButton("Start Eval");
-		btnStart.setBounds(148, 145, 100, 25);
+		btnStart.setBounds(148, 186, 100, 25);
 		getContentPane().add(btnStart);
 		btnStart.addActionListener(new ActionListener() {
 
@@ -120,7 +138,7 @@ public class Interface extends JFrame {
 		btnStart.setEnabled(false);
 
 		JButton btnViewTree = new JButton("View tree");
-		btnViewTree.setBounds(262, 145, 100, 25);
+		btnViewTree.setBounds(262, 186, 100, 25);
 		getContentPane().add(btnViewTree);
 		btnViewTree.addActionListener(new ActionListener() {
 
@@ -136,7 +154,7 @@ public class Interface extends JFrame {
 		btnViewTree.setEnabled(false);
 
 		JButton btnViewRules = new JButton("View rules");
-		btnViewRules.setBounds(376, 145, 100, 25);
+		btnViewRules.setBounds(376, 186, 100, 25);
 		getContentPane().add(btnViewRules);
 		btnViewRules.addActionListener(new ActionListener() {
 
@@ -151,8 +169,8 @@ public class Interface extends JFrame {
 		});
 		btnViewRules.setEnabled(false);
 
-		JButton btnBuildClassifier = new JButton("Build Classifier");
-		btnBuildClassifier.setBounds(14, 145, 120, 25);
+		btnBuildClassifier = new JButton("Build Classifier");
+		btnBuildClassifier.setBounds(14, 186, 120, 25);
 		getContentPane().add(btnBuildClassifier);
 		btnBuildClassifier.addActionListener(new ActionListener() {
 
@@ -161,7 +179,8 @@ public class Interface extends JFrame {
 				try {
 					if (!trainDataPath.equals("")) {
 						parkinsonClassifier = new ParkinsonClassifier(
-								trainDataPath, outputArea);
+								trainDataPath, outputArea, chckbxUnpruned
+										.isSelected());
 
 						if (parkinsonClassifier.buildClassifier()) {
 							btnBuildClassifier.setEnabled(false);

@@ -95,7 +95,7 @@ public class ParkinsonEvaluation {
 		testDataInstances.setClassIndex(testDataInstances.numAttributes() - 1);
 
 		Remove remove = new Remove();
-		remove.setAttributeIndices("1,2,4,7,12,13,14,25");
+		remove.setAttributeIndices("1,7,27,9,12,4,6,13,17,23,22");
 		remove.setInvertSelection(false);
 		remove.setInputFormat(testDataInstances);
 		testDataInstances = Filter.useFilter(testDataInstances, remove);

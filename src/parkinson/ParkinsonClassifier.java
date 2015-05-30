@@ -22,11 +22,13 @@ public class ParkinsonClassifier implements Serializable {
 	private Instances trainDataInstances;
 	private BufferedReader trainBuffer;
 	private J48 classifier;
+	boolean unprunedTree;
 
-	public ParkinsonClassifier(String trainDataPath, JTextArea logsOut)
-			throws Exception {
+	public ParkinsonClassifier(String trainDataPath, JTextArea logsOut,
+			boolean unprunedTree) throws Exception {
 		this.trainDataPath = trainDataPath;
 		this.logsOut = logsOut;
+		this.unprunedTree = unprunedTree;
 	}
 
 	private boolean buildInstance() {
@@ -56,6 +58,11 @@ public class ParkinsonClassifier implements Serializable {
 		long tStart = System.currentTimeMillis();
 
 		classifier = new J48();
+		if (unprunedTree) {
+			String[] options = new String[1];
+			options[0] = "-U";
+			classifier.setOptions(options);
+		}
 
 		if (!getFileBuffer()) {
 			logsOut.append("Error while building file buffer!");
@@ -72,8 +79,9 @@ public class ParkinsonClassifier implements Serializable {
 
 		// atributos a remover
 		Remove remove = new Remove();
-		 remove.setAttributeIndices("1,2,4,7,12,13,14,25,28");
-//		remove.setAttributeIndices("1,28");
+		// remove.setAttributeIndices("1,2,4,7,12,13,14,25,28");
+		// remove.setAttributeIndices("1,28");
+		remove.setAttributeIndices("1,7,27,28,9,12,4,6,13,17,23,22");
 		remove.setInvertSelection(false);
 		remove.setInputFormat(trainDataInstances);
 		trainDataInstances = Filter.useFilter(trainDataInstances, remove);
