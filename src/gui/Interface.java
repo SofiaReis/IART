@@ -48,6 +48,7 @@ public class Interface extends JFrame {
 	private JRadioButton rdbtnUseTrainingData;
 
 	private JCheckBox chckbxUnpruned;
+	private JCheckBox chckbxFilterAtributes;
 
 	private JTextArea outputArea;
 
@@ -55,7 +56,7 @@ public class Interface extends JFrame {
 
 	private ParkinsonClassifier parkinsonClassifier;
 
-	private JFrame tree = new JFrame("Decision Tree");
+	private JFrame tree;
 	private JFrame rules = new JFrame("Rules");
 
 	/**
@@ -67,6 +68,7 @@ public class Interface extends JFrame {
 				try {
 					Interface frame = new Interface();
 					frame.setVisible(true);
+					frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -92,7 +94,7 @@ public class Interface extends JFrame {
 		buttons();
 
 		chckbxUnpruned = new JCheckBox("Unpruned tree");
-		chckbxUnpruned.setBounds(28, 141, 135, 25);
+		chckbxUnpruned.setBounds(84, 141, 150, 25);
 		getContentPane().add(chckbxUnpruned);
 		chckbxUnpruned.addActionListener(new ActionListener() {
 
@@ -101,9 +103,21 @@ public class Interface extends JFrame {
 					btnBuildClassifier.setEnabled(true);
 			}
 		});
+		chckbxFilterAtributes = new JCheckBox("Filter Attributes");
+		chckbxFilterAtributes.setBounds(288, 141, 150, 25);
+		getContentPane().add(chckbxFilterAtributes);
+		chckbxFilterAtributes.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+					btnBuildClassifier.setEnabled(true);
+			}
+		});
+		chckbxFilterAtributes.setSelected(true);
+		
 
 		outputArea = new JTextArea();
-		outputArea.setBounds(0, 224, 495, 183);
+		outputArea.setBounds(24, 10, 495, 183);
 		getContentPane().add(outputArea);
 		JScrollPane scrollPane = new JScrollPane(outputArea);
 		scrollPane.setBounds(0, 224, 495, 183);
@@ -180,7 +194,7 @@ public class Interface extends JFrame {
 					if (!trainDataPath.equals("")) {
 						parkinsonClassifier = new ParkinsonClassifier(
 								trainDataPath, outputArea, chckbxUnpruned
-										.isSelected());
+										.isSelected(), chckbxFilterAtributes.isSelected());
 
 						if (parkinsonClassifier.buildClassifier()) {
 							btnBuildClassifier.setEnabled(false);
@@ -270,11 +284,11 @@ public class Interface extends JFrame {
 		getContentPane().add(lblTestOptions);
 
 		rdbtnUseTrainingData = new JRadioButton("Use training data");
-		rdbtnUseTrainingData.setBounds(28, 111, 135, 25);
+		rdbtnUseTrainingData.setBounds(28, 111, 151, 25);
 		getContentPane().add(rdbtnUseTrainingData);
 
 		rdbtnCrossvalidation = new JRadioButton("Cross-validation");
-		rdbtnCrossvalidation.setBounds(183, 111, 135, 25);
+		rdbtnCrossvalidation.setBounds(183, 111, 151, 25);
 		getContentPane().add(rdbtnCrossvalidation);
 
 		rdbtnUseTestData = new JRadioButton("Use test data");
@@ -290,6 +304,8 @@ public class Interface extends JFrame {
 	}
 
 	public void viewTree() throws Exception {
+		tree = new JFrame("Decision Tree");
+		
 		tree.setSize(1300, 700);
 		tree.getContentPane().setLayout(new BorderLayout());
 		TreeVisualizer visualizer = null;
